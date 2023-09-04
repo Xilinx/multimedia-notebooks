@@ -38,7 +38,8 @@ V4L2SRC="v4l2src"
 INTERNAL_ENTROPY_BUFFERS="2"
 RTP_CAPS="application/x-rtp, media=video, clock-rate=90000, payload=96,"
 MPEGTS_CAPS="video/mpegts"
-AUDIO_SINK="autoaudiosink"
+AUDIO_SINK="alsasink"
+AUDIO_OUTPUT="hw:0"
 AUDIO_SINK_BASE="unknown"
 AUDIOCONVERT="audioconvert"
 AUDIORESAMPLE="audioresample"
@@ -239,22 +240,22 @@ fi
 #########################################################################################
 # Name:		installYoutubeDl
 # Argument:	None
-# Description:  Install youtube_dl if not found on board
+# Description:  Install yt-dlp if not found on board
 #########################################################################################
 installYoutubeDl () {
-	which youtube-dl
+	which yt-dlp
 	if [ $? -ne 0 ]; then
 		which pip3
 		if [ $? -ne 0 ]; then
 			ErrorMsg "pip3 command not found, Please install pip3"
 		fi
 		if [ -z $PROXY ]; then
-			pip3 install youtube_dl
+			pip3 install yt-dlp
 		else
-			pip3 install youtube_dl --proxy $PROXY
+			pip3 install yt-dlp --proxy $PROXY
 		fi
 		if [ $? -ne 0 ]; then
-			ErrorMsg "Unable to download youtube_dl, Please check network connectivity"
+			ErrorMsg "Unable to download yt-dlp, Please check network connectivity"
 		fi
 	fi
 }
@@ -296,7 +297,7 @@ setAudioSrcProps () {
                 fi
         fi
 
-	AUDIO_SRC="$AUDIO_SRC do-timestamp=true"
+	AUDIO_SRC="$AUDIO_SRC "
 }
 
 #########################################################################################

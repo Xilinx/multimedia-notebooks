@@ -167,7 +167,7 @@ DecodeYoutubeFile () {
 		SINK="$SINK_NAME"
 	fi
 
-	FILE_SRC=$SOUPHTTP_SRC"=\$(youtube-dl -f 22 -g "$DEFAULT_URL")"
+	FILE_SRC=$SOUPHTTP_SRC"=\$(yt-dlp -f 22 -g "$DEFAULT_URL")"
 
 	pipeline="$GST_LAUNCH $FILE_SRC ! decodebin name=demux demux. ! $QUEUE max-size-bytes=0 ! $SINK demux. ! $QUEUE ! $AUDIOCONVERT ! $AUDIORESAMPLE ! $AUDIO_SINK"
 
