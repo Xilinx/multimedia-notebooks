@@ -60,7 +60,7 @@ DecodeFile() {
 	fi
 
 #Added this code block as VDU currently having kmssink issue
-	if [ "$SINK_NAME" == "kmssink bus-id=fd4a0000.display fullscreen-overlay=1" -o "$SINK_NAME" == "kmssink bus-id=a0070000.v_mix fullscreen-overlay=1" ]; then
+	if [ "$SINK_NAME" == "kmssink bus-id=fd4a0000.display fullscreen-overlay=1 hold-extra-sample=true" -o "$SINK_NAME" == "kmssink bus-id=a0070000.v_mix fullscreen-overlay=1 hold-extra-sample=true" ]; then
                        ErrorMsg "\n kmssink is currently not supported in VDU \n"              
         fi
 

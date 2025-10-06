@@ -364,7 +364,7 @@ setDefaultifEmpty () {
 
 		sinkName )
 			if [ -z $SINK_NAME ]; then
-				SINK_NAME="kmssink bus-id="$DISPLAY_DEVICE" fullscreen-overlay=1"
+				SINK_NAME="kmssink bus-id="$DISPLAY_DEVICE" fullscreen-overlay=1 hold-extra-sample=true"
 			fi
 			;;
 		codecType )
@@ -877,7 +877,7 @@ while true; do
                         ;;
 		-d | --display-device)
                         DISPLAY_DEVICE=$2;
-			KMSSINK="kmssink bus-id=$DISPLAY_DEVICE fullscreen-overlay=1"
+			KMSSINK="kmssink bus-id=$DISPLAY_DEVICE fullscreen-overlay=1 hold-extra-sample=true"
                         shift; shift;
                         ;;
 		--compressed-mode)
