@@ -59,6 +59,12 @@ DPMS="unknown"
 PULSEAUDIO="unknown"
 VIDEOTESTSRC="videotestsrc"
 
+if Command -v devmem >/dev/null 2>&1; then
+    DEVMEM_CMD="devmem"
+elif command -v devmem2 >/dev/null 2>&1; then
+    DEVMEM_CMD="devmem2"
+fi
+
 #####################################################################################
 # Name:		killProcess
 # Argument:	Name of the process to be killed
@@ -103,26 +109,27 @@ catchCTRL_C() {
 #		set outstanding read/write requests for AFI ports where VCU is connected to 16
 ##############################################################################################
 RegSetting () {
+
 	# Qos = 3 for VCU
-	devmem 0xfd3b0008 w 0x3   #DEC0, DEC1<->HP3_FPD
-	devmem 0xfd3b001c w 0x3
-	devmem 0xfd3b0004 w 0xf
-	devmem 0xfd3b0018 w 0xf
+	$DEVMEM_CMD 0xfd3b0008 w 0x3   #DEC0, DEC1<->HP3_FPD
+	$DEVMEM_CMD 0xfd3b001c w 0x3
+	$DEVMEM_CMD 0xfd3b0004 w 0xf
+	$DEVMEM_CMD 0xfd3b0018 w 0xf
 
-	devmem 0xfd390008 w 0x3    #ENC1<->HP1_FPD
-	devmem 0xfd39001c w 0x3
-	devmem 0xfd390004 w 0xf
-	devmem 0xfd390018 w 0xf
+	$DEVMEM_CMD 0xfd390008 w 0x3    #ENC1<->HP1_FPD
+	$DEVMEM_CMD 0xfd39001c w 0x3
+	$DEVMEM_CMD 0xfd390004 w 0xf
+	$DEVMEM_CMD 0xfd390018 w 0xf
 
-	devmem 0xfd3a0008 w 0x3    #ENC0<->HP2_FPD
-	devmem 0xfd3a001c w 0x3
-	devmem 0xfd3a0004 w 0xf
-	devmem 0xfd3a0018 w 0xf
+	$DEVMEM_CMD 0xfd3a0008 w 0x3    #ENC0<->HP2_FPD
+	$DEVMEM_CMD 0xfd3a001c w 0x3
+	$DEVMEM_CMD 0xfd3a0004 w 0xf
+	$DEVMEM_CMD 0xfd3a0018 w 0xf
 
-	devmem 0xfd360008 w 0x3     #MCU<->HPC0
-	devmem 0xfd36001c w 0x3
-	devmem 0xfd360004 w 0x7
-	devmem 0xfd360018 w 0x7
+	$DEVMEM_CMD 0xfd360008 w 0x3     #MCU<->HPC0
+	$DEVMEM_CMD 0xfd36001c w 0x3
+	$DEVMEM_CMD 0xfd360004 w 0x7
+	$DEVMEM_CMD 0xfd360018 w 0x7
 }
 
 ##############################################################################################
@@ -179,7 +186,7 @@ restartPulseAudio () {
 # Description:  Set the volume for DP codec to maximum
 ######################################################################################
 audioSetting () {
-	devmem 0xFD4AC000 32 0xffffffff
+	$DEVMEM_CMD 0xFD4AC000 w 0xffffffff
         which amixer > /dev/null
 	if [ $? -eq 0 ]; then
 		amixer sset 'Master' 100%
@@ -339,14 +346,23 @@ setDefaultifEmpty () {
 			;;
 		v4l2Device )
 			if [ -z $V4L2_DEVICE ]; then
-				V4L2_DEVICE="/dev/video0"
+                for dev in /dev/video*; do
+                    echo "Checking $dev..."
+                    if v4l2-ctl --device="$dev" --all 2>/dev/null | grep -q "Video input : 0 (Camera"; then
+                        V4L2_DEVICE="$dev"
+                        echo "Found capture device: $V4L2_DEVICE"
+                        break
+                    fi
+                done
+                if [ -z $V4L2_DEVICE ]; then
+                    ErrorMsg "No usable video capture device found"
+                fi
+
 				V4L2SRC="$V4L2SRC device=$V4L2_DEVICE"
 				echo "V4L2 device node is not specified in args hence assuming $V4L2_DEVICE as default capture device"
 			fi
 			if ! [ -e $V4L2_DEVICE ]; then
 				ErrorMsg "No camera device found at $V4L2_DEVICE, please give correct path and try again"
-			else
-				echo "No input file path was specified so using $V4L2_DEVICE as default input file"
 			fi
 			;;
 		displayDevice )
